@@ -2,9 +2,11 @@
 # -*- coding:utf-8 -*-
 
 """
-    class path
-    ~~~~~~~~~~~~~~~
-    Class description.
+    silex.datatype.dicts
+    ~~~~~~~~~~~~~~~~~~~~
+
+    From Sqlmap's code!
+    Thanks to Sqlmap-project!
 
     :author:    lightless <root@lightless.me>
     :homepage:  None
@@ -87,28 +89,3 @@ class AttribDict(dict):
             retVal.__setitem__(key, copy.deepcopy(value, memo))
 
         return retVal
-
-
-class InjectionDict(AttribDict):
-    def __init__(self):
-        AttribDict.__init__(self)
-
-        self.place = None
-        self.parameter = None
-        self.ptype = None
-        self.prefix = None
-        self.suffix = None
-        self.clause = None
-        self.notes = []  # Note: https://github.com/sqlmapproject/sqlmap/issues/1888
-
-        # data is a dict with various stype, each which is a dict with
-        # all the information specific for that stype
-        self.data = AttribDict()
-
-        # conf is a dict which stores current snapshot of important
-        # options used during detection
-        self.conf = AttribDict()
-
-        self.dbms = None
-        self.dbms_version = None
-        self.os = None

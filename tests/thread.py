@@ -14,7 +14,7 @@
 import time
 import unittest
 
-from RedstoneUtils.engines.thread import SingleThreadEngine, MultiThreadEngine
+from silex.engines.thread import SingleThreadEngine, MultiThreadEngine
 
 
 class TestThread(unittest.TestCase):

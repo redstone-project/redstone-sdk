@@ -14,7 +14,7 @@
 
 import unittest
 
-from RedstoneUtils.datatype.dicts import AttribDict
+from silex.datatype.dicts import AttribDict
 
 
 class TestDicts(unittest.TestCase):

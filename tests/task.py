@@ -14,7 +14,7 @@
 import unittest
 from queue import PriorityQueue
 
-from RedstoneUtils.datatype.task import PriorityTask
+from silex.datatype.task import PriorityTask
 
 
 class TestPriorityTask(unittest.TestCase):

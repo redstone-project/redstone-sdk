@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 """
-    RedstoneUtils.engines.thread
+    silex.engines.thread
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     基于thread的各种engine
@@ -10,7 +10,7 @@
     :author:    lightless <root@lightless.me>
     :homepage:  None
     :license:   GPL-3.0, see LICENSE for more details.
-    :copyright: Copyright (c) 2017 lightless. All rights reserved
+    :copyright: Copyright (c) 2017-2019 lightless. All rights reserved
 """
 
 
@@ -31,15 +31,25 @@ class SingleThreadEngine(CommonBaseEngine):
 
     def __init__(self, app_ctx, name=None):
         super(SingleThreadEngine, self).__init__()
+
+        # 引擎的名称
         self.name = name if name else "SingleThreadEngine"
+
+        # 外层的app context，如果没有可以留None
         self.app_ctx = app_ctx
+
+        # 引擎的主线程
+        self.thread: threading.Thread = None
+
+        # 引擎的event对象
+        self.ev: threading.Event = None
 
     def start(self):
         self.status = EngineStatus.RUNNING
         self.thread: threading.Thread = threading.Thread(target=self._worker, name=self.name)
         self.thread.start()
 
-    def stop(self, force=True):
+    def stop(self):
         self.status = EngineStatus.STOP
         self.ev.set()
 
@@ -58,9 +68,21 @@ class MultiThreadEngine(CommonBaseEngine):
 
     def __init__(self, app_ctx, name=None, pool_size=None):
         super(MultiThreadEngine, self).__init__()
+
+        # 引擎的名称
         self.name = name if name else "MultiThreadEngine"
+
+        # 外层的app context，如果无用则留None
         self.app_ctx = app_ctx
+
+        # 线程池的大小，默认为 2 * count(cpu) + 1
         self.pool_size = pool_size if pool_size else multiprocessing.cpu_count() * 2 + 1
+
+        # 引擎的主线程池
+        self.thread_pool: typing.List[threading.Thread] = None
+
+        # 引擎的event对象
+        self.ev: threading.Event = None
 
     def start(self):
         self.status = EngineStatus.RUNNING
@@ -68,13 +90,9 @@ class MultiThreadEngine(CommonBaseEngine):
             [threading.Thread(
                 target=self._worker, name="{}-{}".format(self.name, idx)
             ) for idx in range(self.pool_size)]
-        _ = [t.start() for t in self.thread_pool]
+        map(lambda t: t.start(), self.thread_pool)
 
-    def stop(self, force=True):
-        if not force:
-            while not self.app_ctx.MessageQueues.SEARCH_TASK_QUEUE.empty():
-                self.ev.wait(1)
-                continue
+    def stop(self):
         self.status = EngineStatus.STOP
         self.ev.set()
 

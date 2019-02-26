@@ -12,8 +12,7 @@
     :copyright: Copyright (c) 2017 lightless. All rights reserved
 """
 
-import threading
-from typing import List
+
 import abc
 
 from . import EngineStatus
@@ -23,11 +22,12 @@ class CommonBaseEngine(object):
 
     def __init__(self):
         super(CommonBaseEngine, self).__init__()
+
+        # 引擎的名称
         self.name = "BaseEngine"
+
+        # 引擎的状态，实例化后默认为 READY 状态
         self.status = EngineStatus.READY
-        self.ev: threading.Event = threading.Event()
-        self.thread: threading.Thread = None
-        self.thread_pool: List[threading.Thread] = None
 
     def is_running(self):
         return self.status == EngineStatus.RUNNING
@@ -37,7 +37,7 @@ class CommonBaseEngine(object):
         pass
 
     @abc.abstractmethod
-    def stop(self, force=True):
+    def stop(self):
         pass
 
     @abc.abstractmethod

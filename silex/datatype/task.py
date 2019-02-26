@@ -2,9 +2,10 @@
 # -*- coding:utf-8 -*-
 
 """
-    class path
-    ~~~~~~~~~~~~~~~
-    Class description.
+    silex.datatype.task
+    ~~~~~~~~~~~~~~~~~~~
+
+    简单的优先级task
 
     :author:    lightless <root@lightless.me>
     :homepage:  None
