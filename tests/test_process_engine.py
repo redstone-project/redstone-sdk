@@ -22,42 +22,37 @@ class TestProcess(unittest.TestCase):
 
     def test_single_process_engine(self):
 
-        class SE(SingleProcessEngine):
+        class MyEngine(SingleProcessEngine):
+
             def _worker(self):
+                print("my engine start!")
+
                 cnt = 0
-                print("app_ctx: {}".format(self.app_ctx))
 
+                # while status == EngineStatus.RUNNING:
                 while self.is_running():
-                    print("self.status: {}".format(self.status))
-                    self.ev.wait(2)
+                    time.sleep(1)
                     cnt += 1
-                    print("cnt:", cnt)
-                    # self.ev.wait(100)
+                    print("worker, cnt:", cnt)
+                    print("current status:", self.status)
 
-        app_ctx = {
-            "a": 1,
-            "foo": "bar",
-        }
+                print("my engine stop!")
 
-        e = SE(app_ctx, "TestSingleProcessEngine")
+        e = MyEngine("aaa", None)
         e.start()
 
         self.assertTrue(e.is_running())
         self.assertTrue(e.is_alive())
 
-        # self.assertIsInstance(e.pid(), int, "e.pid(): {}".format(e.pid()))
-        print("e.pid(): {}".format(e.pid()))
-
+        print("let it run 5s...")
         time.sleep(5)
-        t1 = time.time()
-        e.stop()
-        time.sleep(1)
-        print(time.time() - t1)
-        # e.process.terminate()
-        # time.sleep(5)
 
-        self.assertFalse(e.is_alive())
+        print("now, stop it!")
+        e.stop(wait=True)
+        # e.process.join()
+
+        print("kill done, check status!")
+        print("is_running:", e.is_running())
+        print("is_alive:", e.is_alive())
         self.assertFalse(e.is_running())
-
-# 方案一：直接使用terminate来结束进程
-# 方案二：将shared variable传到每个进程中去，调用方无感知
+        self.assertFalse(e.is_alive())
