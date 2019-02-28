@@ -15,18 +15,19 @@
 import abc
 import ctypes
 import multiprocessing
+from typing import List
 
 from silex.engines import EngineStatus
 from silex.engines._base import CommonBaseEngine
 
 
-class SingleProcessEngine(CommonBaseEngine):
+class ProcessEngine(CommonBaseEngine):
     """
     基于单进程的引擎模块
     """
 
     def __init__(self, name, app_ctx=None):
-        super(SingleProcessEngine, self).__init__()
+        super(ProcessEngine, self).__init__()
         self._manager = multiprocessing.Manager()
 
         # 引擎的名称
@@ -64,6 +65,48 @@ class SingleProcessEngine(CommonBaseEngine):
 
     def is_running(self):
         return self.status.value == EngineStatus.RUNNING
+
+    @abc.abstractmethod
+    def _worker(self):
+        pass
+
+
+class ProcessPoolEngine(CommonBaseEngine):
+    """
+    基于进程池的引擎
+    """
+
+    def __init__(self, name, app_ctx=None, pool_size=None):
+        super(ProcessPoolEngine, self).__init__()
+        self._manager = multiprocessing.Manager()
+
+        self.name = name if name else "DefaultProcessPool"
+        self.app_ctx = app_ctx
+
+        self.status: ctypes.c_int = self._manager.Value("i", EngineStatus.READY)
+        self.ev = self._manager.Event()
+
+        self.pool_size = pool_size if pool_size else multiprocessing.cpu_count()
+        self.pool: List[multiprocessing.Process] = []
+
+    def start(self):
+        self.status.value = EngineStatus.RUNNING
+        self.pool = [multiprocessing.Process(
+            target=self._worker, name="{}-{}".format(self.name, idx)
+        ) for idx in range(self.pool_size)]
+        [p.start() for p in self.pool]
+
+    def stop(self, wait=False, timeout=None):
+        self.status.value = EngineStatus.STOP
+        self.ev.set()
+        if wait:
+            [p.join(timeout) for p in self.pool]
+
+    def is_running(self):
+        return self.status.value == EngineStatus.RUNNING
+
+    def is_alive(self):
+        return any([p.is_alive() for p in self.pool])
 
     @abc.abstractmethod
     def _worker(self):
