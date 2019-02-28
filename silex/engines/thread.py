@@ -24,13 +24,13 @@ from ._base import CommonBaseEngine
 from . import EngineStatus
 
 
-class SingleThreadEngine(CommonBaseEngine):
+class ThreadEngine(CommonBaseEngine):
     """
     基于单线程的引擎模块
     """
 
     def __init__(self, app_ctx, name=None):
-        super(SingleThreadEngine, self).__init__()
+        super(ThreadEngine, self).__init__()
 
         # 引擎的名称
         self.name = name if name else "SingleThreadEngine"
@@ -61,13 +61,13 @@ class SingleThreadEngine(CommonBaseEngine):
         pass
 
 
-class MultiThreadEngine(CommonBaseEngine):
+class ThreadPoolEngine(CommonBaseEngine):
     """
     基于多线程的基础引擎
     """
 
     def __init__(self, app_ctx, name=None, pool_size=None):
-        super(MultiThreadEngine, self).__init__()
+        super(ThreadPoolEngine, self).__init__()
 
         # 引擎的名称
         self.name = name if name else "MultiThreadEngine"

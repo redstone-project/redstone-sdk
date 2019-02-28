@@ -14,13 +14,13 @@
 import time
 import unittest
 
-from silex.engines.thread import SingleThreadEngine, MultiThreadEngine
+from silex.engines.thread import ThreadEngine, ThreadPoolEngine
 
 
 class TestThread(unittest.TestCase):
     def test_single_thread_engine(self):
 
-        class SE(SingleThreadEngine):
+        class SE(ThreadEngine):
             def _worker(self):
                 while self.is_running():
                     self.ev.wait(1)
@@ -39,7 +39,7 @@ class TestThread(unittest.TestCase):
         self.assertFalse(engine.is_running())
 
     def test_multi_thread_engine(self):
-        class ME(MultiThreadEngine):
+        class ME(ThreadPoolEngine):
             def _worker(self):
                 while self.is_running():
                     self.ev.wait(1)
