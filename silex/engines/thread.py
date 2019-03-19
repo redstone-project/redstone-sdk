@@ -21,7 +21,7 @@ import typing
 import abc
 
 from ._base import CommonBaseEngine
-from . import EngineStatus
+from .constant import engine_status
 
 
 class ThreadEngine(CommonBaseEngine):
@@ -45,12 +45,12 @@ class ThreadEngine(CommonBaseEngine):
         self.ev: threading.Event = None
 
     def start(self):
-        self.status = EngineStatus.RUNNING
+        self.status = engine_status.RUNNING
         self.thread: threading.Thread = threading.Thread(target=self._worker, name=self.name)
         self.thread.start()
 
     def stop(self):
-        self.status = EngineStatus.STOP
+        self.status = engine_status.STOP
         self.ev.set()
 
     def is_alive(self):
@@ -85,7 +85,7 @@ class ThreadPoolEngine(CommonBaseEngine):
         self.ev: threading.Event = None
 
     def start(self):
-        self.status = EngineStatus.RUNNING
+        self.status = engine_status.RUNNING
         self.thread_pool: typing.List[threading.Thread] = \
             [threading.Thread(
                 target=self._worker, name="{}-{}".format(self.name, idx)
@@ -93,7 +93,7 @@ class ThreadPoolEngine(CommonBaseEngine):
         map(lambda t: t.start(), self.thread_pool)
 
     def stop(self):
-        self.status = EngineStatus.STOP
+        self.status = engine_status.STOP
         self.ev.set()
 
     def is_alive(self):

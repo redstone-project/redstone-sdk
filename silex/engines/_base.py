@@ -15,7 +15,7 @@
 
 import abc
 
-from . import EngineStatus
+from .constant import engine_status
 
 
 class CommonBaseEngine(object):
@@ -27,10 +27,10 @@ class CommonBaseEngine(object):
         self.name = "BaseEngine"
 
         # 引擎的状态，实例化后默认为 READY 状态
-        self.status = EngineStatus.READY
+        self.status = engine_status.READY
 
     def is_running(self):
-        return self.status == EngineStatus.RUNNING
+        return self.status == engine_status.RUNNING
 
     @abc.abstractmethod
     def start(self):
@@ -42,8 +42,4 @@ class CommonBaseEngine(object):
 
     @abc.abstractmethod
     def is_alive(self):
-        pass
-
-    @abc.abstractmethod
-    def _worker(self):
         pass

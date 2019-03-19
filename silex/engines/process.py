@@ -17,7 +17,7 @@ import ctypes
 import multiprocessing
 from typing import List
 
-from silex.engines import EngineStatus
+from silex.engines.constant import engine_status
 from silex.engines._base import CommonBaseEngine
 
 
@@ -43,16 +43,16 @@ class ProcessEngine(CommonBaseEngine):
         self.ev: multiprocessing.Event = None
 
         # 引擎的status
-        self.status: ctypes.c_int = self._manager.Value("i", EngineStatus.READY)
+        self.status: ctypes.c_int = self._manager.Value("i", engine_status.READY)
 
     def start(self):
         self.ev: multiprocessing.Event = self._manager.Event()
-        self.status.value = EngineStatus.RUNNING
+        self.status.value = engine_status.RUNNING
         self.process = multiprocessing.Process(target=self._worker, name=self.name)
         self.process.start()
 
     def stop(self, wait=False, timeout=None):
-        self.status.value = EngineStatus.STOP
+        self.status.value = engine_status.STOP
         self.ev.set()
         if wait:
             self.process.join(timeout)
@@ -64,7 +64,7 @@ class ProcessEngine(CommonBaseEngine):
         return self.process.pid
 
     def is_running(self):
-        return self.status.value == EngineStatus.RUNNING
+        return self.status.value == engine_status.RUNNING
 
     @abc.abstractmethod
     def _worker(self):
@@ -83,27 +83,27 @@ class ProcessPoolEngine(CommonBaseEngine):
         self.name = name if name else "DefaultProcessPool"
         self.app_ctx = app_ctx
 
-        self.status: ctypes.c_int = self._manager.Value("i", EngineStatus.READY)
+        self.status: ctypes.c_int = self._manager.Value("i", engine_status.READY)
         self.ev = self._manager.Event()
 
         self.pool_size = pool_size if pool_size else multiprocessing.cpu_count()
         self.pool: List[multiprocessing.Process] = []
 
     def start(self):
-        self.status.value = EngineStatus.RUNNING
+        self.status.value = engine_status.RUNNING
         self.pool = [multiprocessing.Process(
             target=self._worker, name="{}-{}".format(self.name, idx)
         ) for idx in range(self.pool_size)]
         [p.start() for p in self.pool]
 
     def stop(self, wait=False, timeout=None):
-        self.status.value = EngineStatus.STOP
+        self.status.value = engine_status.STOP
         self.ev.set()
         if wait:
             [p.join(timeout) for p in self.pool]
 
     def is_running(self):
-        return self.status.value == EngineStatus.RUNNING
+        return self.status.value == engine_status.RUNNING
 
     def is_alive(self):
         return any([p.is_alive() for p in self.pool])
