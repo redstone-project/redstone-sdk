@@ -41,7 +41,7 @@ class CoroutinePoolEngine(CommonBaseEngine):
     基于协程池的引擎模块
     """
 
-    def __init__(self, app_ctx, name=None, pool_size=None):
+    def __init__(self, name, app_ctx=None, pool_size=None):
         super(CoroutinePoolEngine, self).__init__()
 
         # name
@@ -65,7 +65,7 @@ class CoroutinePoolEngine(CommonBaseEngine):
     def start(self):
         """开启一个新的线程来容纳协程池"""
         self.status = engine_status.RUNNING
-        self.ev = asyncio.Event()
+        # self.ev = asyncio.Event()
         self.coroutine_thread = threading.Thread(target=self._loader, name=self.name)
         self.coroutine_thread.start()
 
@@ -78,6 +78,17 @@ class CoroutinePoolEngine(CommonBaseEngine):
     def is_alive(self):
         """线程的状态就是协程池的状态"""
         return self.coroutine_thread.is_alive()
+
+    def _init_event(self):
+        self.ev = asyncio.Event()
+
+    async def _wait(self, timeout: float):
+        try:
+            await asyncio.wait_for(self.ev.wait(), timeout)
+        except asyncio.TimeoutError:
+            pass
+        finally:
+            return self.ev.is_set()
 
     def _loader(self):
         """启动协程池"""
